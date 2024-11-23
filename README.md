@@ -8,6 +8,7 @@ This project is an **Animal Detection and Warning System** implemented using **Y
 - **Animal Detection**: Specifically detects dogs using the YOLO model.
 - **Warning System**: Sends MQTT messages to trigger a warning system when a dog is detected for consecutive frames.
 - **User Interface**: Streamlit is used for creating the front-end to interact with the system and visualize the processed video.
+- **Hardware Integration**: Includes an MQTT-based circuit simulation using [Wokwi](https://wokwi.com/) for LED display and sound buzzer warnings.
 
 ## Technologies Used
 
@@ -17,6 +18,7 @@ This project is an **Animal Detection and Warning System** implemented using **Y
 - **Python**: Main programming language for implementing the backend logic.
 - **Ultralytics**: For YOLO model implementation and inference.
 - **OpenCV**: For handling video processing and manipulation.
+- **Wokwi**: For simulating hardware components like LED screens and buzzers.
 - **Git**: For version control.
 
 ## Setup
@@ -69,16 +71,29 @@ Once the app starts, you can access it on your browser:
 3. **Dog Detection**: The system specifically checks for the presence of a dog in the frames.
 4. **Consecutive Detection**: If a dog is detected consecutively for 10 frames, an MQTT message is sent with the `"on"` signal to trigger a warning. If no dog is detected for 10 frames, an `"off"` signal is sent.
 5. **Live Video Stream**: The processed video with detected objects is displayed to the user.
+6. **Hardware Simulation**: The MQTT messages are received by a Wokwi circuit that acts as a subscriber.
 
-## MQTT Integration
+## MQTT Integration with Wokwi Simulation
 
-The system uses MQTT to send warning signals based on the detection of a dog:
+This project integrates with a Wokwi simulation that serves as a hardware demonstration for the warning system:
 
-- The warning is sent if the dog is detected consecutively in multiple frames.
-- A signal `"on"` is sent when the dog is detected for 10 consecutive frames.
-- A signal `"off"` is sent when no dog is detected for 10 consecutive frames.
+- The Wokwi circuit contains:
+  - An **LED screen** that displays the message: **"ANIMAL DETECTED DRIVE SLOW!!!"**.
+  - A **sound buzzer** that activates when a warning signal is received.
+- **MQTT Roles**:
+  - The **Streamlit application** acts as the **publisher**.
+  - The **Wokwi circuit** acts as the **subscriber**.
+- **Signal Behavior**:
+  - An **"on"** signal triggers the LED display and buzzer.
+  - An **"off"** signal turns them off.
 
-To set up MQTT, make sure to replace the MQTT broker information in the script:
+You can view the Wokwi simulation for this project at the following link:
+
+👉 [Wokwi Simulation: Animal Warning System](https://wokwi.com/projects/415272090827317249)
+
+### MQTT Configuration
+
+To set up MQTT, ensure you replace the MQTT broker details in the code:
 
 ```python
 mqtt_broker = "your_broker_ip"
@@ -103,8 +118,9 @@ mqtt_topic = "animal_warning"
   
   Example:
   ```bash
-  python check_installayions.py
+  python check_installations.py
   ```
 
 - **No Detection**: If no dogs are detected, ensure that the YOLO model is correctly loaded and that the model weights (`best.pt`) are available in the specified directory.
 
+- **MQTT Connection Issues**: Ensure that the MQTT broker is correctly configured and accessible from both the Streamlit application and the Wokwi circuit.
