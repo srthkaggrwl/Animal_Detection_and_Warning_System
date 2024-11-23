@@ -8,20 +8,20 @@ import subprocess
 import cv2
 import time
 
-# Paths and settings
-MODEL_PATH = "/home/sarthak/animal_detection_and_warning_system/best.pt"  # Path to YOLO model
-SAVE_DIR = "/home/sarthak/animal_detection_and_warning_system/runs/detect"  # Directory to save processed videos
+
+MODEL_PATH = "/home/sarthak/animal_detection_and_warning_system/best.pt"  
+SAVE_DIR = "/home/sarthak/animal_detection_and_warning_system/runs/detect" 
 os.makedirs(SAVE_DIR, exist_ok=True)
 
-# MQTT Broker details
-MQTT_BROKER = "test.mosquitto.org"  # Replace with your ngrok public address
-MQTT_PORT = 1883  # Replace with your ngrok port
-MQTT_TOPIC = "testicals/topic"  # Topic to subscribe to
 
-# Load YOLO model
+MQTT_BROKER = "test.mosquitto.org"  
+MQTT_PORT = 1883  
+MQTT_TOPIC = "testicals/topic" 
+
+
 model = YOLO(MODEL_PATH)
 
-# MQTT Publisher function
+
 def publish_message(message):
     try:
         client = mqtt.Client()
@@ -34,7 +34,7 @@ def publish_message(message):
     except Exception as e:
         st.error(f"Failed to send message: {str(e)}")
 
-# Video conversion function
+
 def convert_to_mp4(input_path, output_path):
     try:
         subprocess.run(
@@ -46,7 +46,6 @@ def convert_to_mp4(input_path, output_path):
         st.error(f"Failed to convert video: {e}")
         return None
 
-# Real-time video display function
 def display_real_time_video(video_path):
     st.write("### Real-Time Video Display")
     cap = cv2.VideoCapture(video_path)
@@ -55,80 +54,73 @@ def display_real_time_video(video_path):
         st.error("Failed to open the video for real-time display.")
         return
 
-    # Real-time frame reading and displaying
-    stframe = st.empty()  # Streamlit placeholder for video frames
+   
+    stframe = st.empty()  
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
-            time.sleep(0.1)  # Wait if no new frames are available
+            time.sleep(0.1)  
             continue
 
-        # Convert the frame to RGB for Streamlit display
+        
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         stframe.image(frame_rgb, channels="RGB", use_container_width=True)
 
-        # Stop real-time display when processing is complete
-        if not os.path.exists(video_path):  # Check if file is being overwritten
+       
+        if not os.path.exists(video_path): 
             break
 
     cap.release()
 
-# Streamlit interface
+
 st.title("Animal Detection and Warning System")
 st.write("This application detects animals in uploaded videos using thermal sensors and a trained ML model, triggering deterrents when necessary.")
 
-# Control buttons for buzzer
+
 if st.button("Detect Animal", key="detect_animal"):
-    publish_message("on")  # Activate the buzzer
+    publish_message("on")  
 
 if st.button("Turn Off", key="turn_off"):
-    publish_message("off")  # Deactivate the buzzer
+    publish_message("off")  
 
-# Video upload and processing
+
 st.write("### Upload a video for animal detection")
 uploaded_video = st.file_uploader("Choose a video file", type=["mp4", "avi", "mov"])
 if uploaded_video is not None:
-    # Save the uploaded video to a temporary file
     temp_video_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
     temp_video_file.write(uploaded_video.read())
     temp_video_file.close()
 
-    # Process the video frame by frame
     st.info("Processing the video through the YOLO model. Please wait...")
 
     try:
         consecutive_with_dog = 0
         consecutive_without_dog = 0
-        DOG_CLASS_ID = 0  # Replace with the class ID for "dog" in your YOLO model
-        CONFIDENCE_THRESHOLD = 0.5  # Adjust confidence threshold as needed
+        DOG_CLASS_ID = 0  
+        CONFIDENCE_THRESHOLD = 0.5 
 
-        # YOLO model inference with frame-by-frame analysis
         results = model.track(
             source=temp_video_file.name,
-            stream=True,  # Enables live processing frame by frame
+            stream=True,  
             show=False,
             save=True,
             save_txt=False,
             save_dir=SAVE_DIR
         )
 
-        # Real-time video display during YOLO inference
-        stframe = st.empty()  # Streamlit placeholder for live video frames
+        stframe = st.empty()  
         for result in results:
-            detections = result.boxes.data.cpu().numpy()  # YOLO detections
+            detections = result.boxes.data.cpu().numpy()  
             has_dog = False
 
-            # Loop through each detection
             for d in detections:
-                class_id = int(d[5])  # Get the class ID
-                confidence = d[4]  # Confidence score for the detection
+                class_id = int(d[5])  
+                confidence = d[4]  
 
-                # Check if a dog is detected with sufficient confidence
                 if class_id == DOG_CLASS_ID and confidence > CONFIDENCE_THRESHOLD:
                     has_dog = True
-                    break  # Exit the loop if a dog is detected
+                    break 
 
-            # Update consecutive counters based on detection status
             if has_dog:
                 consecutive_with_dog += 1
                 consecutive_without_dog = 0
@@ -136,15 +128,13 @@ if uploaded_video is not None:
                 consecutive_without_dog += 1
                 consecutive_with_dog = 0
 
-            # Publish messages based on consecutive detection status
             if consecutive_with_dog == 10:
                 publish_message("on")
             elif consecutive_without_dog == 10:
                 publish_message("off")
 
-            # Display the current frame in real-time
-            frame = result.orig_img  # Get the current frame
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Convert to RGB
+            frame = result.orig_img  
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) 
             stframe.image(frame_rgb, channels="RGB", use_container_width=True)
         
         
@@ -152,19 +142,16 @@ if uploaded_video is not None:
 
         st.success("Video processing completed successfully!")
 
-        # Get the processed video file path
         processed_dirs = sorted(glob.glob(f"{SAVE_DIR}/*"), key=os.path.getctime, reverse=True)
         if not processed_dirs:
             raise FileNotFoundError("No processed directories found!")
-        processed_dir = processed_dirs[0]  # Get the most recent directory
+        processed_dir = processed_dirs[0]  
 
-        # Find the video file within the processed directory
         processed_video_path = glob.glob(f"{processed_dir}/*.avi")
         if not processed_video_path:
             raise FileNotFoundError("Processed video file not found!")
-        processed_video_path = processed_video_path[0]  # Get the first video file
-
-        # Convert the AVI file to MP4
+        processed_video_path = processed_video_path[0]  
+        
         mp4_video_path = os.path.join(processed_dir, "output.mp4")
         converted_video_path = convert_to_mp4(processed_video_path, mp4_video_path)
                 
@@ -172,10 +159,9 @@ if uploaded_video is not None:
         if converted_video_path:
             st.success(f"Video processed and converted successfully! Path: {converted_video_path}")
 
-            # Display the processed video
             st.write("### Processed Video")
             with open(converted_video_path, "rb") as processed_file:
-                st.video(processed_file.read())  # Show the processed video to the user
+                st.video(processed_file.read())  
 
     except Exception as e:
         st.error(f"Failed to process video: {str(e)}")
