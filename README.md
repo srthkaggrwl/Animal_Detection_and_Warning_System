@@ -1,6 +1,6 @@
 ### README.md
 
-```markdown
+
 # Animal Detection and Warning System
 
 This project is an **Animal Detection and Warning System** implemented using **YOLO** (You Only Look Once) for real-time object detection, and **Streamlit** for the user interface. It detects the presence of animals, particularly dogs, in a video stream and triggers warning signals through MQTT based on consecutive detection.
