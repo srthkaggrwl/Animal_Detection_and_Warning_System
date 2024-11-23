@@ -1,0 +1,20 @@
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# Ignore virtual environments
+venv/
+env/
+
+# Ignore the runs/detect folder
+runs/detect/
+
+# Ignore logs
+*.log
+
+# Ignore nohup output file
+nohup.out
+
+# Ignore system files
+.DS_Store
+Thumbs.db
