@@ -108,6 +108,3 @@ mqtt_topic = "animal_warning"
 
 - **No Detection**: If no dogs are detected, ensure that the YOLO model is correctly loaded and that the model weights (`best.pt`) are available in the specified directory.
 
-
-```
-
