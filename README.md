@@ -91,16 +91,10 @@ mqtt_topic = "animal_warning"
 ```plaintext
 .
 ├── .gitignore            # Git ignore file
-├── backup.py             # Backup scripts for the project
-├── backup2.py            # Backup script 2
-├── backup3.py            # Backup script 3
 ├── best.pt               # YOLO model weights
 ├── check_installations.py # Script to check required installations
-├── commands.txt          # Commands for the server
-├── nohup.out             # Log file for background processes
 ├── package.json          # Package management for frontend
 ├── streamlit_app.py      # Main Streamlit application file
-└── test.py               # Test script for detecting animals in images
 ```
 
 ## Troubleshooting
@@ -109,22 +103,11 @@ mqtt_topic = "animal_warning"
   
   Example:
   ```bash
-  pip install -r requirements.txt
+  python check_installayions.py
   ```
 
 - **No Detection**: If no dogs are detected, ensure that the YOLO model is correctly loaded and that the model weights (`best.pt`) are available in the specified directory.
 
-## Contributing
 
-Feel free to fork this repository and submit pull requests. If you have any feature requests or issues, please open an issue on GitHub.
-
-## License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Thanks to the [Ultralytics YOLO](https://github.com/ultralytics/yolov5) team for the YOLO model.
-- Thanks to the Streamlit team for creating a fantastic framework for rapid app development.
 ```
 
